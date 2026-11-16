@@ -4,6 +4,25 @@ A high-performance, modern FiveM garage and impound management system for **ESX 
 
 ---
 
+## 📷 Previews
+
+### 🚗 Main Garage Interface & Live Telemetry
+![Main UI](screenshots/Main%20UI.png)
+
+### 📋 Impounded Vehicles List & Fees
+![Impounded Cars](screenshots/Impounded%20Cars.png)
+
+### 📍 Impound Lot Site & Physical Retrieval
+![Impound Site](screenshots/impound%20site.png)
+
+### 🔑 Single-Authority Key Integration (`p_vehiclekeys`)
+![Key Integration](screenshots/p_vehiclekeys%20Integration.png)
+
+### ✏️ Custom Vehicle Nickname System
+![Set Nickname](screenshots/Set%20NickName.png)
+
+---
+
 ## ✨ Features
 
 - **Modern Dark Dashboard UI**:
@@ -22,6 +41,7 @@ A high-performance, modern FiveM garage and impound management system for **ESX 
     - When viewing an impounded vehicle from a regular garage, the retrieve action is grayed out with a clear notice.
     - When at an **Impound Lot**, the button turns vibrant green and allows instant payment and vehicle retrieval.
   - **Police Hold Support**: Locked impounds display reason, ticketing officer, date, and hold badge.
+  - **Transparent `/impound` Command**: Dedicated in-game prompt for police and mechanics that floats seamlessly over the game world.
 
 - **Vehicle Personalization & Quick Access**:
   - **Favorites System**: Star your most-used vehicles to pin them to the top of your list.
