@@ -182,7 +182,7 @@ local function formatVehicleForNui(vehicle)
         fuel = fuelPercent,
         body = bodyPercent,
         engine = enginePercent,
-        state = vehicle.state or (impData and 'in_impound' or (vehicle.stored == 1 and 'in_garage' or 'out_garage')),
+        state = vehicle.state or (impData and 'in_impound' or (vehicle.pound and 'in_impound' or ((vehicle.stored == 1 or vehicle.stored == true) and 'in_garage' or 'in_impound'))),
         is_favorite = isFav,
         nickname = nickname,
         impound_data = impData,

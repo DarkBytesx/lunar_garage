@@ -215,7 +215,7 @@ function selectVehicle(vehicle) {
   document.getElementById('det-plate').textContent = vehicle.plate || 'PLATE';
   document.getElementById('det-plate-exact').textContent = vehicle.plate || 'PLATE';
   document.getElementById('det-class-chip').textContent = vehicle.className || 'Automobile';
-  document.getElementById('det-garage-name').textContent = state.garageName;
+  document.getElementById('det-garage-name').textContent = vehicle.state === 'in_impound' ? 'City Impound Yard' : (vehicle.state === 'out_garage' ? 'Out in the City' : state.garageName);
 
   // Nickname
   const nickPill = document.getElementById('det-nickname-pill');
@@ -352,20 +352,55 @@ function renderActionDock(vehicle) {
     }
 
   } else if (vehicle.state === 'out_garage') {
-    const btnGps = document.createElement('button');
-    btnGps.type = 'button';
-    btnGps.className = 'btn-primary-action btn-gps';
-    btnGps.innerHTML = `
-      <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-      </svg>
-      <span>Mark on GPS Waypoint</span>
-    `;
-    btnGps.addEventListener('click', () => {
-      fetchNui('markGps', { plate: vehicle.plate });
-      closeUi();
-    });
-    dock.appendChild(btnGps);
+    if (state.facilityType === 'impound') {
+      const btnRecover = document.createElement('button');
+      btnRecover.type = 'button';
+      btnRecover.className = 'btn-primary-action btn-impound-retrieve';
+      btnRecover.innerHTML = `
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+        </svg>
+        <span>Recover Vehicle ($1000)</span>
+      `;
+      btnRecover.addEventListener('click', () => {
+        fetchNui('retrieveImpound', {
+          index: state.garageIndex,
+          props: vehicle.props
+        });
+      });
+      dock.appendChild(btnRecover);
+
+      const btnGps = document.createElement('button');
+      btnGps.type = 'button';
+      btnGps.className = 'btn-primary-action btn-gps';
+      btnGps.style.marginTop = '0.6vh';
+      btnGps.innerHTML = `
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+        </svg>
+        <span>Mark on GPS Waypoint</span>
+      `;
+      btnGps.addEventListener('click', () => {
+        fetchNui('markGps', { plate: vehicle.plate });
+        closeUi();
+      });
+      dock.appendChild(btnGps);
+    } else {
+      const btnGps = document.createElement('button');
+      btnGps.type = 'button';
+      btnGps.className = 'btn-primary-action btn-gps';
+      btnGps.innerHTML = `
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+        </svg>
+        <span>Mark on GPS Waypoint</span>
+      `;
+      btnGps.addEventListener('click', () => {
+        fetchNui('markGps', { plate: vehicle.plate });
+        closeUi();
+      });
+      dock.appendChild(btnGps);
+    }
 
   } else if (vehicle.state === 'in_impound') {
     const fee = vehicle.impound_data?.fee || 1000;
