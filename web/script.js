@@ -524,12 +524,16 @@ function openUi(data) {
 
   const mainTitle = document.getElementById('section-main-title');
   const subTitle = document.getElementById('section-sub-title');
+  const filterInGarage = document.querySelector('.filter-btn[data-filter="in_garage"]');
+
   if (state.facilityType === 'impound') {
     mainTitle.textContent = 'Impound Lot';
     subTitle.textContent = 'Inspect impounded vehicles, pay release fines, and retrieve your car.';
+    if (filterInGarage) filterInGarage.classList.add('hidden');
   } else {
     mainTitle.textContent = 'Personal Vehicles';
     subTitle.textContent = 'Inspect specifications, spawn, and manage your vehicles.';
+    if (filterInGarage) filterInGarage.classList.remove('hidden');
   }
 
   // Ensure modal dialogs are hidden and main garage container is shown
