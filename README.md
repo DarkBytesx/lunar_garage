@@ -2,6 +2,9 @@
 
 A high-performance, modern FiveM garage and impound management system for **ESX Legacy**, completely overhauled with a sleek dark dashboard UI, live vehicle telemetry, vehicle personalization, and seamless key management.
 
+[![GitHub Release](https://img.shields.io/github/v/release/DarkBytesx/lunar_garage?color=orange&label=Release)](https://github.com/DarkBytesx/lunar_garage/releases/latest)
+[![Download ZIP](https://img.shields.io/badge/Download-lunar__garage.zip-success)](https://github.com/DarkBytesx/lunar_garage/releases/download/v1.0/lunar_garage.zip)
+
 ---
 
 ## 📷 Previews
@@ -53,6 +56,17 @@ A high-performance, modern FiveM garage and impound management system for **ESX 
   - Authoritative key issuance: Player receives exactly **1 key** when taking out or retrieving a vehicle.
   - Duplicate key checks prevent inventory clutter.
   - Automatic key removal when storing a vehicle back into a garage or impound lot.
+
+---
+
+## 🛠️ Recent Fixes & Improvements (v1.0)
+
+- **Impound State Synchronization**: Unified vehicle state resolution (`resolveVehicleState`) so newly booted servers or despawned vehicles (`stored == 0`) cleanly route to `in_impound` instead of being stuck.
+- **Dynamic Facility Filter Bar**: Impound Lot UI dynamically hides the `[In Garage]` filter button, showing only relevant tabs (`[All]`, `[Outside]`, `[Impounded]`, `[⭐ Favorites]`).
+- **Dual Outside Actions at Impound**: Active vehicles outside in the city now offer both **Recover Vehicle ($1000)** and **Mark on GPS Waypoint** simultaneously when viewed at the impound facility.
+- **Action Dock Button Alignment**: Removed unintended top margin offset and enforced flexbox alignment for pixel-perfect side-by-side buttons in the details action dock.
+- **Dedicated `/impound` Modal**: Police and mechanics can use `/impound` as a standalone modal without dimming or loading the entire garage UI behind it.
+- **Location Status Accuracy**: Real-time location text displays "City Impound Yard", "Out in the City", or the exact garage facility name.
 
 ---
 
