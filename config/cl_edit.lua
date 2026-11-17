@@ -95,12 +95,20 @@ function SetVehicleOwner(plate, vehicle)
                 print(string.format('^2[lunar_garage:DEBUG:CLIENT]^7 Calling wasabi_carlock:GiveKey for plate: "%s"', plate))
             end
             exports['wasabi_carlock']:GiveKey(plate)
+        else
+            if Config.Debug then
+                print('^3[lunar_garage:DEBUG:CLIENT]^7 Note: Neither p_vehiclekeys nor wasabi_carlock is running')
+            end
         end
     elseif Framework.name == 'qb-core' then
         if Config.Debug then
             print(string.format('^2[lunar_garage:DEBUG:CLIENT]^7 Triggering vehiclekeys:client:SetOwner for plate: "%s"', plate))
         end
         TriggerEvent("vehiclekeys:client:SetOwner", plate)
+    else
+        if Config.Debug then
+            print('^3[lunar_garage:DEBUG:CLIENT]^7 No active vehicle keys resource detected')
+        end
     end
 end
 
