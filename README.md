@@ -1,9 +1,9 @@
-# Lunar Garage (Rework v1.4)
+# Lunar Garage (Rework v1.5)
 
 A high-performance, modern FiveM garage and impound management system for **ESX Legacy**, completely overhauled with a sleek dark dashboard UI, live vehicle telemetry, vehicle personalization, and seamless key management.
 
 [![GitHub Release](https://img.shields.io/github/v/release/DarkBytesx/lunar_garage?color=orange&label=Release)](https://github.com/DarkBytesx/lunar_garage/releases/latest)
-[![Download ZIP](https://img.shields.io/badge/Download-lunar__garage.zip-success)](https://github.com/DarkBytesx/lunar_garage/releases/download/v1.4/lunar_garage.zip)
+[![Download ZIP](https://img.shields.io/badge/Download-lunar__garage.zip-success)](https://github.com/DarkBytesx/lunar_garage/releases/download/v1.5/lunar_garage.zip)
 
 ---
 
@@ -60,6 +60,12 @@ A high-performance, modern FiveM garage and impound management system for **ESX 
 ---
 
 ## 🛠️ Recent Fixes & Improvements
+
+### Version 1.5
+- **Verbose Diagnostics & Comprehensive Debug Mode (`Config.Debug`)**: Added detailed debug logging across both client (F8 console) and server terminal for every stage of the vehicle lifecycle (take out, retrieve, save, lock status, and key granting/removal).
+- **Authoritative Server Key Management**: Keys are reliably issued directly on the server upon vehicle spawn (via `takeOutVehicle` and `retrieveVehicle`) with `ox_inventory:Search` count verification to ensure players receive exactly **1 key** (no duplicates, no misses).
+- **Zero-Touch Stock `p_vehiclekeys` Compatibility**: Fully compliant with unmodified stock `p_vehiclekeys` without requiring any edits or fragile client-side entity lookups.
+- **Automatic Inventory Key Cleanup**: When a vehicle is saved back into the garage, its corresponding `car_key` item is cleanly removed from the player's inventory on the server.
 
 ### Version 1.4
 - **Official Client Key API Implementation**: Replaced invalid export checks with direct invocation of the official `exports['p_vehiclekeys']:createKey(plate, vehicle)` client export from the pScripts documentation.

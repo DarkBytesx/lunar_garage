@@ -1,4 +1,5 @@
 Config = {}
+Config.Debug = true -- Prints debug logs to client F8 console and server terminal
 Config.MaxDistance = 10.0 -- Max interact distance
 Config.UseKeySystem = true -- Integrated with p_vehiclekeys and qb-vehiclekeys (configured in cl_edit.lua)
 Config.SpawnpointCheck = false -- Checks if the vehicle spawnpoint is empty before spawning it.

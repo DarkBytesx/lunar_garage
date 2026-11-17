@@ -47,67 +47,88 @@ function SetVehicleFuel(vehicle, fuelLevel)
 end
 
 function SetVehicleOwner(plate, vehicle)
-    if not Config.UseKeySystem then return end
+    if not Config.UseKeySystem then
+        if Config.Debug then
+            print('^3[lunar_garage:DEBUG:CLIENT]^7 SetVehicleOwner skipped: Config.UseKeySystem is false')
+        end
+        return
+    end
 
     plate = plate and (string.strtrim and plate:strtrim(' ') or plate:match('^%s*(.-)%s*$')) or ''
-    if plate == '' then return end
+    if plate == '' then
+        if Config.Debug then
+            print('^1[lunar_garage:DEBUG:CLIENT]^7 SetVehicleOwner failed: plate is empty')
+        end
+        return
+    end
 
     vehicle = vehicle or GetVehiclePedIsIn(cache.ped, false)
     if not vehicle or vehicle == 0 then
         vehicle = lib.getClosestVehicle(GetEntityCoords(cache.ped), 10.0, true)
     end
 
+    local isNetworked = vehicle and vehicle ~= 0 and NetworkGetEntityIsNetworked(vehicle) or false
+    local netId = isNetworked and NetworkGetNetworkIdFromEntity(vehicle) or nil
+
+    if Config.Debug then
+        print(string.format('^3[lunar_garage:DEBUG:CLIENT]^7 SetVehicleOwner -> plate: "%s", vehicleHandle: %s, networked: %s, netId: %s',
+            tostring(plate), tostring(vehicle), tostring(isNetworked), tostring(netId)
+        ))
+    end
+
     if vehicle and vehicle ~= 0 then
         SetVehicleDoorsLocked(vehicle, 1)
         SetVehicleDoorsLockedForAllPlayers(vehicle, false)
         SetVehicleHasBeenOwnedByPlayer(vehicle, true)
+        if Config.Debug then
+            print(string.format('^2[lunar_garage:DEBUG:CLIENT]^7 Vehicle unlocked and ownership confirmed for handle %s', tostring(vehicle)))
+        end
     end
 
     if GetResourceState('p_vehiclekeys') == 'started' then
-        pcall(function()
-            local alreadyHasKey = false
-            if GetResourceState('ox_inventory') == 'started' then
-                local count = exports.ox_inventory:Search('count', 'car_key', { plate = plate }) or 0
-                if count and count > 0 then alreadyHasKey = true end
-            end
-
-            if not alreadyHasKey then
-                if exports['p_vehiclekeys'] and exports['p_vehiclekeys'].createKey then
-                    exports['p_vehiclekeys']:createKey(plate, vehicle)
-                else
-                    local netId = (vehicle and vehicle ~= 0 and NetworkGetEntityIsNetworked(vehicle)) and NetworkGetNetworkIdFromEntity(vehicle) or nil
-                    if netId then
-                        TriggerServerEvent('p_vehiclekeys/createKey', plate, netId)
-                    end
-                end
-            end
-        end)
+        if Config.Debug then
+            print('^2[lunar_garage:DEBUG:CLIENT]^7 p_vehiclekeys active: vehicle key item is managed authoritatively by server on spawn')
+        end
     elseif Framework.name == 'es_extended' then
         if GetResourceState('wasabi_carlock') == 'started' then
+            if Config.Debug then
+                print(string.format('^2[lunar_garage:DEBUG:CLIENT]^7 Calling wasabi_carlock:GiveKey for plate: "%s"', plate))
+            end
             exports['wasabi_carlock']:GiveKey(plate)
         end
     elseif Framework.name == 'qb-core' then
+        if Config.Debug then
+            print(string.format('^2[lunar_garage:DEBUG:CLIENT]^7 Triggering vehiclekeys:client:SetOwner for plate: "%s"', plate))
+        end
         TriggerEvent("vehiclekeys:client:SetOwner", plate)
     end
 end
 
 function RemoveVehicleKey(plate)
-    if not Config.UseKeySystem then return end
+    if not Config.UseKeySystem then
+        if Config.Debug then
+            print('^3[lunar_garage:DEBUG:CLIENT]^7 RemoveVehicleKey skipped: Config.UseKeySystem is false')
+        end
+        return
+    end
 
     plate = plate and (string.strtrim and plate:strtrim(' ') or plate:match('^%s*(.-)%s*$')) or ''
     if plate == '' then return end
 
+    if Config.Debug then
+        print(string.format('^3[lunar_garage:DEBUG:CLIENT]^7 RemoveVehicleKey -> plate: "%s"', tostring(plate)))
+    end
+
     if GetResourceState('p_vehiclekeys') == 'started' then
-        pcall(function()
-            if exports['p_vehiclekeys'] and exports['p_vehiclekeys'].removeKey then
-                exports['p_vehiclekeys']:removeKey(plate, nil, true)
-            else
-                TriggerServerEvent('p_vehiclekeys/removeKey', plate, true)
-            end
-        end)
+        if Config.Debug then
+            print('^2[lunar_garage:DEBUG:CLIENT]^7 p_vehiclekeys active: vehicle key removal is managed authoritatively by server on saveVehicle')
+        end
     elseif Framework.name == 'es_extended' then
         if GetResourceState('wasabi_carlock') == 'started' then
             pcall(function()
+                if Config.Debug then
+                    print(string.format('^2[lunar_garage:DEBUG:CLIENT]^7 Calling wasabi_carlock:RemoveKey for plate: "%s"', plate))
+                end
                 exports['wasabi_carlock']:RemoveKey(plate)
             end)
         end

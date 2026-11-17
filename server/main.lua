@@ -63,48 +63,135 @@ local function resolveVehicleState(vehicle)
 end
 
 local function giveVehicleKey(source, plate, netId)
-    if not Config.UseKeySystem then return end
-    local trimmedPlate = plate and (string.strtrim and plate:strtrim(' ') or plate:match('^%s*(.-)%s*$')) or ''
-    if trimmedPlate == '' then return end
-
-    pcall(function()
-        -- 1. Check if player already possesses a key for this plate (idempotency / prevent duplicate keys)
-        if GetResourceState('ox_inventory') == 'started' then
-            local count = exports.ox_inventory:Search(source, 'count', 'car_key', { plate = trimmedPlate }) or 0
-            if count and count > 0 then return end
+    if not Config.UseKeySystem then
+        if Config.Debug then
+            print('^3[lunar_garage:DEBUG:SERVER]^7 giveVehicleKey skipped: Config.UseKeySystem is false')
         end
+        return
+    end
 
-        -- 2. Grant key via active key system
-        if GetResourceState('p_vehiclekeys') == 'started' then
-            -- Handled client-side via official export: exports['p_vehiclekeys']:createKey(plate, vehicle)
-        elseif GetResourceState('wasabi_carlock') == 'started' then
-            exports['wasabi_carlock']:GiveKey(source, trimmedPlate)
-        elseif GetResourceState('Renewed-Vehiclekeys') == 'started' then
-            exports['Renewed-Vehiclekeys']:addKey(source, trimmedPlate)
-        elseif GetResourceState('qb-vehiclekeys') == 'started' then
-            exports['qb-vehiclekeys']:GiveKeys(source, trimmedPlate)
-        end
-    end)
-end
-
-local function removeVehicleKey(source, plate)
-    if not Config.UseKeySystem then return end
     local trimmedPlate = plate and (string.strtrim and plate:strtrim(' ') or plate:match('^%s*(.-)%s*$')) or ''
-    if trimmedPlate == '' then return end
+    if trimmedPlate == '' then
+        if Config.Debug then
+            print('^1[lunar_garage:DEBUG:SERVER]^7 giveVehicleKey failed: plate is empty')
+        end
+        return
+    end
+
+    if Config.Debug then
+        print(string.format('^3[lunar_garage:DEBUG:SERVER]^7 giveVehicleKey called -> source: %s, plate: "%s", netId: %s',
+            tostring(source), trimmedPlate, tostring(netId)
+        ))
+    end
 
     pcall(function()
         if GetResourceState('p_vehiclekeys') == 'started' then
             if GetResourceState('ox_inventory') == 'started' then
                 local count = exports.ox_inventory:Search(source, 'count', 'car_key', { plate = trimmedPlate }) or 0
-                if count and count > 0 then
-                    exports.ox_inventory:RemoveItem(source, 'car_key', count, { plate = trimmedPlate })
+                if Config.Debug then
+                    print(string.format('^3[lunar_garage:DEBUG:SERVER]^7 ox_inventory check: player %s currently has %s car_key(s) for plate "%s"',
+                        tostring(source), tostring(count), trimmedPlate
+                    ))
                 end
+
+                if count and count > 0 then
+                    if Config.Debug then
+                        print(string.format('^3[lunar_garage:DEBUG:SERVER]^7 Player %s already holds %s car_key for plate "%s", skipping to prevent duplicate keys',
+                            tostring(source), count, trimmedPlate
+                        ))
+                    end
+                    return
+                end
+
+                local success, response = exports.ox_inventory:AddItem(source, 'car_key', 1, { plate = trimmedPlate })
+                if Config.Debug then
+                    print(string.format('^2[lunar_garage:DEBUG:SERVER]^7 ox_inventory:AddItem("car_key", 1, { plate = "%s" }) to player %s -> success: %s, response: %s',
+                        trimmedPlate, tostring(source), tostring(success), tostring(response)
+                    ))
+                end
+            else
+                if Config.Debug then
+                    print(string.format('^3[lunar_garage:DEBUG:SERVER]^7 ox_inventory not running, triggering p_vehiclekeys/compat/addKey for player %s, plate "%s"',
+                        tostring(source), trimmedPlate
+                    ))
+                end
+                TriggerClientEvent('p_vehiclekeys/compat/addKey', source, trimmedPlate)
             end
         elseif GetResourceState('wasabi_carlock') == 'started' then
+            if Config.Debug then
+                print(string.format('^2[lunar_garage:DEBUG:SERVER]^7 Calling wasabi_carlock:GiveKey(%s, "%s")', tostring(source), trimmedPlate))
+            end
+            exports['wasabi_carlock']:GiveKey(source, trimmedPlate)
+        elseif GetResourceState('Renewed-Vehiclekeys') == 'started' then
+            if Config.Debug then
+                print(string.format('^2[lunar_garage:DEBUG:SERVER]^7 Calling Renewed-Vehiclekeys:addKey(%s, "%s")', tostring(source), trimmedPlate))
+            end
+            exports['Renewed-Vehiclekeys']:addKey(source, trimmedPlate)
+        elseif GetResourceState('qb-vehiclekeys') == 'started' then
+            if Config.Debug then
+                print(string.format('^2[lunar_garage:DEBUG:SERVER]^7 Calling qb-vehiclekeys:GiveKeys(%s, "%s")', tostring(source), trimmedPlate))
+            end
+            exports['qb-vehiclekeys']:GiveKeys(source, trimmedPlate)
+        else
+            if Config.Debug then
+                print('^3[lunar_garage:DEBUG:SERVER]^7 No supported vehicle key resource detected')
+            end
+        end
+    end)
+end
+
+local function removeVehicleKey(source, plate)
+    if not Config.UseKeySystem then
+        if Config.Debug then
+            print('^3[lunar_garage:DEBUG:SERVER]^7 removeVehicleKey skipped: Config.UseKeySystem is false')
+        end
+        return
+    end
+
+    local trimmedPlate = plate and (string.strtrim and plate:strtrim(' ') or plate:match('^%s*(.-)%s*$')) or ''
+    if trimmedPlate == '' then return end
+
+    if Config.Debug then
+        print(string.format('^3[lunar_garage:DEBUG:SERVER]^7 removeVehicleKey called -> source: %s, plate: "%s"',
+            tostring(source), trimmedPlate
+        ))
+    end
+
+    pcall(function()
+        if GetResourceState('p_vehiclekeys') == 'started' then
+            if GetResourceState('ox_inventory') == 'started' then
+                local count = exports.ox_inventory:Search(source, 'count', 'car_key', { plate = trimmedPlate }) or 0
+                if Config.Debug then
+                    print(string.format('^3[lunar_garage:DEBUG:SERVER]^7 ox_inventory: found %s car_key(s) for plate "%s" on player %s',
+                        tostring(count), trimmedPlate, tostring(source)
+                    ))
+                end
+
+                if count and count > 0 then
+                    local removed = exports.ox_inventory:RemoveItem(source, 'car_key', count, { plate = trimmedPlate })
+                    if Config.Debug then
+                        print(string.format('^2[lunar_garage:DEBUG:SERVER]^7 ox_inventory:RemoveItem removed %s car_key(s) for plate "%s": result=%s',
+                            count, trimmedPlate, tostring(removed)
+                        ))
+                    end
+                end
+            else
+                TriggerClientEvent('p_vehiclekeys/client/removeKey', source, trimmedPlate)
+            end
+        elseif GetResourceState('wasabi_carlock') == 'started' then
+            if Config.Debug then
+                print(string.format('^2[lunar_garage:DEBUG:SERVER]^7 wasabi_carlock:RemoveKey(%s, "%s")', tostring(source), trimmedPlate))
+            end
             exports['wasabi_carlock']:RemoveKey(source, trimmedPlate)
         elseif GetResourceState('Renewed-Vehiclekeys') == 'started' then
+            if Config.Debug then
+                print(string.format('^2[lunar_garage:DEBUG:SERVER]^7 Renewed-Vehiclekeys:removeKey(%s, "%s")', tostring(source), trimmedPlate))
+            end
             exports['Renewed-Vehiclekeys']:removeKey(source, trimmedPlate)
         elseif GetResourceState('qb-vehiclekeys') == 'started' then
+            if Config.Debug then
+                print(string.format('^2[lunar_garage:DEBUG:SERVER]^7 qb-vehiclekeys:RemoveKeys(%s, "%s")', tostring(source), trimmedPlate))
+            end
             exports['qb-vehiclekeys']:RemoveKeys(source, trimmedPlate)
         end
     end)
@@ -149,6 +236,12 @@ lib.callback.register('lunar_garage:takeOutVehicle', function(source, index, pla
     local player = Framework.getPlayerFromId(source)
     if not player then return end
 
+    if Config.Debug then
+        print(string.format('^3[lunar_garage:DEBUG:SERVER]^7 takeOutVehicle -> player: %s, index: %s, plate: "%s", type: "%s"',
+            tostring(source), tostring(index), tostring(plate), tostring(type)
+        ))
+    end
+
     local vehicle = MySQL.single.await(Queries.getStoredVehicle, {
         player:getIdentifier(), player:getJob(), plate, 1
     })
@@ -160,12 +253,23 @@ lib.callback.register('lunar_garage:takeOutVehicle', function(source, index, pla
         local props = json.decode(vehicle.mods or vehicle.vehicle)
         local entity = Utils.createVehicle(props.model, coords, type)
 
-        if entity == 0 then return end
+        if entity == 0 then
+            if Config.Debug then
+                print(string.format('^1[lunar_garage:DEBUG:SERVER]^7 Failed to create vehicle entity for plate "%s"', tostring(plate)))
+            end
+            return
+        end
 
         while NetworkGetEntityOwner(entity) == -1 do Wait(0) end
 
         local netId, owner = NetworkGetNetworkIdFromEntity(entity), NetworkGetEntityOwner(entity)
         
+        if Config.Debug then
+            print(string.format('^2[lunar_garage:DEBUG:SERVER]^7 Vehicle created -> entity: %s, netId: %s, owner: %s',
+                tostring(entity), tostring(netId), tostring(owner)
+            ))
+        end
+
         TriggerClientEvent('lunar_garage:setVehicleProperties', owner, netId, props)
 
         activeVehicles[plate] = entity
@@ -173,12 +277,22 @@ lib.callback.register('lunar_garage:takeOutVehicle', function(source, index, pla
         giveVehicleKey(source, plate, netId)
 
         return netId
+    else
+        if Config.Debug then
+            print(string.format('^1[lunar_garage:DEBUG:SERVER]^7 Vehicle "%s" not found in garage or already out (stored != 1)', tostring(plate)))
+        end
     end
 end)
 
 lib.callback.register('lunar_garage:saveVehicle', function(source, props, netId)
     local player = Framework.getPlayerFromId(source)
     if not player then return end
+
+    if Config.Debug then
+        print(string.format('^3[lunar_garage:DEBUG:SERVER]^7 saveVehicle -> player: %s, plate: "%s", netId: %s',
+            tostring(source), tostring(props and props.plate), tostring(netId)
+        ))
+    end
 
     local vehicle = MySQL.single.await(Queries.getOwnedVehicle, {
         player:getIdentifier(), player:getJob(), props.plate
@@ -188,6 +302,9 @@ lib.callback.register('lunar_garage:saveVehicle', function(source, props, netId)
         local oldProps = json.decode(vehicle.mods or vehicle.vehicle)
 
         if props.model ~= oldProps.model then
+            if Config.Debug then
+                print(string.format('^1[lunar_garage:DEBUG:SERVER]^7 Model mismatch for plate "%s"', props.plate))
+            end
             return false
         end
 
@@ -216,9 +333,18 @@ lib.callback.register('lunar_garage:retrieveVehicle', function(source, index, pl
     plate = plate and plate:match('^%s*(.-)%s*$')
     if not plate or plate == '' then return false end
 
+    if Config.Debug then
+        print(string.format('^3[lunar_garage:DEBUG:SERVER]^7 retrieveVehicle -> player: %s, impoundIndex: %s, plate: "%s", type: "%s"',
+            tostring(source), tostring(index), tostring(plate), tostring(type)
+        ))
+    end
+
     -- If the vehicle is already spawned in the world, delete the old instance so the player can retrieve it
     if activeVehicles[plate] then
         if DoesEntityExist(activeVehicles[plate]) then
+            if Config.Debug then
+                print(string.format('^3[lunar_garage:DEBUG:SERVER]^7 Deleting existing active vehicle entity %s for plate "%s"', tostring(activeVehicles[plate]), plate))
+            end
             DeleteEntity(activeVehicles[plate])
         end
         activeVehicles[plate] = nil
@@ -227,6 +353,9 @@ lib.callback.register('lunar_garage:retrieveVehicle', function(source, index, pl
     for _, veh in ipairs(GetAllVehicles()) do
         local vehPlate = GetVehicleNumberPlateText(veh)
         if vehPlate and vehPlate:match('^%s*(.-)%s*$') == plate then
+            if Config.Debug then
+                print(string.format('^3[lunar_garage:DEBUG:SERVER]^7 Deleting world vehicle %s matching plate "%s"', tostring(veh), plate))
+            end
             DeleteEntity(veh)
             break
         end
@@ -242,11 +371,17 @@ lib.callback.register('lunar_garage:retrieveVehicle', function(source, index, pl
     if vehicle then
         local impData = vehicle.impound_data and json.decode(vehicle.impound_data) or nil
         if impData and impData.hold then
+            if Config.Debug then
+                print(string.format('^3[lunar_garage:DEBUG:SERVER]^7 Vehicle "%s" is on police hold, retrieval blocked', plate))
+            end
             return false, 'hold'
         end
 
         local price = impData and tonumber(impData.fee) or Config.ImpoundPrice
         if player:getAccountMoney('money') < price then
+            if Config.Debug then
+                print(string.format('^3[lunar_garage:DEBUG:SERVER]^7 Player has insufficient funds for fee $%s', price))
+            end
             return false, 'money'
         end
 
@@ -267,6 +402,12 @@ lib.callback.register('lunar_garage:retrieveVehicle', function(source, index, pl
 
         local netId, owner = NetworkGetNetworkIdFromEntity(entity), NetworkGetEntityOwner(entity)
         
+        if Config.Debug then
+            print(string.format('^2[lunar_garage:DEBUG:SERVER]^7 Impound vehicle created -> entity: %s, netId: %s, owner: %s',
+                tostring(entity), tostring(netId), tostring(owner)
+            ))
+        end
+
         TriggerClientEvent('lunar_garage:setVehicleProperties', owner, netId, props)
 
         activeVehicles[plate] = entity

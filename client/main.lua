@@ -40,9 +40,16 @@ RegisterNetEvent('lunar_garage:setVehicleProperties', function(netId, data)
 end)
 
 function SpawnVehicle(args)
-    ---@type integer, VehicleProperties
-    local index, props in args
-    
+    local index = type(args) == 'table' and args.index or args
+    local props = type(args) == 'table' and args.props or nil
+
+    if not index or not props then
+        if Config.Debug then
+            print('^1[lunar_garage:DEBUG:CLIENT]^7 SpawnVehicle aborted: missing index or props', json.encode(args))
+        end
+        return
+    end
+
     local garage = Config.Garages[index]
     
     if Config.SpawnpointCheck and lib.getClosestVehicle(garage.SpawnPosition.xyz, 3.0, false) then
@@ -50,14 +57,35 @@ function SpawnVehicle(args)
         return
     end
 
+    if Config.Debug then
+        print(string.format('^3[lunar_garage:DEBUG:CLIENT]^7 SpawnVehicle -> garageIndex: %s, model: %s, plate: "%s"',
+            tostring(index), tostring(props.model), tostring(props.plate)
+        ))
+    end
+
     lib.requestModel(props.model)
     local type = getVehicleType(props.model)
     local netId = lib.callback.await('lunar_garage:takeOutVehicle', false, index, props.plate, type)
-    if not netId then return end
+    if not netId then
+        if Config.Debug then
+            print(string.format('^1[lunar_garage:DEBUG:CLIENT]^7 Server callback returned nil netId for plate "%s"', tostring(props.plate)))
+        end
+        return
+    end
     
+    if Config.Debug then
+        print(string.format('^2[lunar_garage:DEBUG:CLIENT]^7 Server returned netId: %s, waiting for network entity...', tostring(netId)))
+    end
+
     while not NetworkDoesEntityExistWithNetworkId(netId) do Wait(0) end
 
     local vehicle = NetworkGetEntityFromNetworkId(netId)
+
+    if Config.Debug then
+        print(string.format('^2[lunar_garage:DEBUG:CLIENT]^7 Resolved network vehicle -> handle: %s, networked: %s',
+            tostring(vehicle), tostring(NetworkGetEntityIsNetworked(vehicle))
+        ))
+    end
 
     CreateThread(function()
         while true do
@@ -232,6 +260,13 @@ local function saveVehicle(vehicle)
     props.bodyHealth = math.floor(GetVehicleBodyHealth(vehicle) + 0.5)
     props.engineHealth = math.floor(GetVehicleEngineHealth(vehicle) + 0.5)
     local netId = NetworkGetNetworkIdFromEntity(vehicle)
+
+    if Config.Debug then
+        print(string.format('^3[lunar_garage:DEBUG:CLIENT]^7 saveVehicle -> vehicleHandle: %s, netId: %s, plate: "%s"',
+            tostring(vehicle), tostring(netId), tostring(props.plate)
+        ))
+    end
+
     local result = lib.callback.await('lunar_garage:saveVehicle', false, props, netId)
     
     if result then
@@ -253,11 +288,20 @@ local function retrieveVehicle(args)
     local props = (type(args) == 'table' and args.props) or nil
     if not props then return end
     
+    if Config.Debug then
+        print(string.format('^3[lunar_garage:DEBUG:CLIENT]^7 retrieveVehicle -> impoundIndex: %s, model: %s, plate: "%s"',
+            tostring(index), tostring(props.model), tostring(props.plate)
+        ))
+    end
+
     lib.requestModel(props.model)
     local type = getVehicleType(props.model)
     local success, res = lib.callback.await('lunar_garage:retrieveVehicle', false, index, props.plate, type)
 
     if not success or not res then
+        if Config.Debug then
+            print(string.format('^1[lunar_garage:DEBUG:CLIENT]^7 retrieveVehicle failed -> res: %s', tostring(res)))
+        end
         if res == 'hold' then
             ShowNotification(locale('vehicle_on_hold'), 'error')
         else
@@ -267,9 +311,19 @@ local function retrieveVehicle(args)
     end
 
     local netId = res
+    if Config.Debug then
+        print(string.format('^2[lunar_garage:DEBUG:CLIENT]^7 retrieveVehicle returned netId: %s, waiting for network entity...', tostring(netId)))
+    end
+
     while not NetworkDoesEntityExistWithNetworkId(netId) do Wait(0) end
 
     local vehicle = NetworkGetEntityFromNetworkId(netId)
+
+    if Config.Debug then
+        print(string.format('^2[lunar_garage:DEBUG:CLIENT]^7 Resolved network vehicle -> handle: %s, networked: %s',
+            tostring(vehicle), tostring(NetworkGetEntityIsNetworked(vehicle))
+        ))
+    end
 
     CreateThread(function()
         while true do
