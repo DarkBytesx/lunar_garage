@@ -69,47 +69,20 @@ local function giveVehicleKey(source, plate, netId)
 
     pcall(function()
         -- 1. Check if player already possesses a key for this plate (idempotency / prevent duplicate keys)
-        local hasKey = false
         if GetResourceState('ox_inventory') == 'started' then
             local count = exports.ox_inventory:Search(source, 'count', 'car_key', { plate = trimmedPlate }) or 0
-            if count and count > 0 then hasKey = true end
+            if count and count > 0 then return end
         end
 
-        if not hasKey and GetResourceState('p_vehiclekeys') == 'started' then
-            if exports['p_vehiclekeys'] and exports['p_vehiclekeys'].hasKey then
-                hasKey = exports['p_vehiclekeys']:hasKey(source, trimmedPlate)
-            elseif exports['wasabi_carlock'] and exports['wasabi_carlock'].HasKey then
-                hasKey = exports['wasabi_carlock']:HasKey(source, trimmedPlate)
-            elseif exports['Renewed-Vehiclekeys'] and exports['Renewed-Vehiclekeys'].hasKey then
-                hasKey = exports['Renewed-Vehiclekeys']:hasKey(source, trimmedPlate)
-            elseif exports['qb-vehiclekeys'] and exports['qb-vehiclekeys'].HasKeys then
-                hasKey = exports['qb-vehiclekeys']:HasKeys(source, trimmedPlate)
-            end
-        end
-
-        if hasKey then return end
-
-        -- 2. Grant key via available key systems / stock p_vehiclekeys shims / inventory
+        -- 2. Grant key via active key system
         if GetResourceState('p_vehiclekeys') == 'started' then
-            if exports['p_vehiclekeys'] and exports['p_vehiclekeys'].createKey then
-                exports['p_vehiclekeys']:createKey(source, trimmedPlate, netId)
-            elseif exports['wasabi_carlock'] and exports['wasabi_carlock'].GiveKey then
-                exports['wasabi_carlock']:GiveKey(source, trimmedPlate)
-            elseif exports['Renewed-Vehiclekeys'] and exports['Renewed-Vehiclekeys'].addKey then
-                exports['Renewed-Vehiclekeys']:addKey(source, trimmedPlate)
-            elseif exports['qb-vehiclekeys'] and exports['qb-vehiclekeys'].GiveKeys then
-                exports['qb-vehiclekeys']:GiveKeys(source, trimmedPlate)
-            elseif GetResourceState('ox_inventory') == 'started' then
-                exports.ox_inventory:AddItem(source, 'car_key', 1, { plate = trimmedPlate })
-            end
+            -- Handled client-side via official export: exports['p_vehiclekeys']:createKey(plate, vehicle)
         elseif GetResourceState('wasabi_carlock') == 'started' then
-            if exports['wasabi_carlock'] and exports['wasabi_carlock'].GiveKey then
-                exports['wasabi_carlock']:GiveKey(source, trimmedPlate)
-            end
+            exports['wasabi_carlock']:GiveKey(source, trimmedPlate)
         elseif GetResourceState('Renewed-Vehiclekeys') == 'started' then
-            if exports['Renewed-Vehiclekeys'] and exports['Renewed-Vehiclekeys'].addKey then
-                exports['Renewed-Vehiclekeys']:addKey(source, trimmedPlate)
-            end
+            exports['Renewed-Vehiclekeys']:addKey(source, trimmedPlate)
+        elseif GetResourceState('qb-vehiclekeys') == 'started' then
+            exports['qb-vehiclekeys']:GiveKeys(source, trimmedPlate)
         end
     end)
 end
@@ -121,17 +94,6 @@ local function removeVehicleKey(source, plate)
 
     pcall(function()
         if GetResourceState('p_vehiclekeys') == 'started' then
-            if exports['p_vehiclekeys'] and exports['p_vehiclekeys'].removeKey then
-                exports['p_vehiclekeys']:removeKey(source, trimmedPlate, true)
-            elseif exports['wasabi_carlock'] and exports['wasabi_carlock'].RemoveKey then
-                exports['wasabi_carlock']:RemoveKey(source, trimmedPlate)
-            elseif exports['Renewed-Vehiclekeys'] and exports['Renewed-Vehiclekeys'].removeKey then
-                exports['Renewed-Vehiclekeys']:removeKey(source, trimmedPlate)
-            elseif exports['qb-vehiclekeys'] and exports['qb-vehiclekeys'].RemoveKeys then
-                exports['qb-vehiclekeys']:RemoveKeys(source, trimmedPlate)
-            end
-
-            -- Ensure any remaining car_key items for this plate are removed from ox_inventory
             if GetResourceState('ox_inventory') == 'started' then
                 local count = exports.ox_inventory:Search(source, 'count', 'car_key', { plate = trimmedPlate }) or 0
                 if count and count > 0 then
@@ -139,13 +101,11 @@ local function removeVehicleKey(source, plate)
                 end
             end
         elseif GetResourceState('wasabi_carlock') == 'started' then
-            if exports['wasabi_carlock'] and exports['wasabi_carlock'].RemoveKey then
-                exports['wasabi_carlock']:RemoveKey(source, trimmedPlate)
-            end
+            exports['wasabi_carlock']:RemoveKey(source, trimmedPlate)
         elseif GetResourceState('Renewed-Vehiclekeys') == 'started' then
-            if exports['Renewed-Vehiclekeys'] and exports['Renewed-Vehiclekeys'].removeKey then
-                exports['Renewed-Vehiclekeys']:removeKey(source, trimmedPlate)
-            end
+            exports['Renewed-Vehiclekeys']:removeKey(source, trimmedPlate)
+        elseif GetResourceState('qb-vehiclekeys') == 'started' then
+            exports['qb-vehiclekeys']:RemoveKeys(source, trimmedPlate)
         end
     end)
 end

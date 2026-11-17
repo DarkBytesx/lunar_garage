@@ -64,8 +64,20 @@ function SetVehicleOwner(plate, vehicle)
     end
 
     if GetResourceState('p_vehiclekeys') == 'started' then
-        -- Key is granted authoritatively on server by lunar_garage (takeOutVehicle / retrieveVehicle)
-        -- No client-side RPC needed to avoid duplicate keys.
+        pcall(function()
+            local alreadyHasKey = false
+            if exports['p_vehiclekeys'] and exports['p_vehiclekeys'].hasKey then
+                alreadyHasKey = exports['p_vehiclekeys']:hasKey(plate)
+            end
+            if not alreadyHasKey then
+                if exports['p_vehiclekeys'] and exports['p_vehiclekeys'].createKey then
+                    exports['p_vehiclekeys']:createKey(plate, vehicle)
+                else
+                    local netId = (vehicle and vehicle ~= 0 and NetworkGetEntityIsNetworked(vehicle)) and NetworkGetNetworkIdFromEntity(vehicle) or nil
+                    TriggerServerEvent('p_vehiclekeys/createKey', plate, netId)
+                end
+            end
+        end)
     elseif Framework.name == 'es_extended' then
         if GetResourceState('wasabi_carlock') == 'started' then
             exports['wasabi_carlock']:GiveKey(plate)
@@ -82,11 +94,11 @@ function RemoveVehicleKey(plate)
     if plate == '' then return end
 
     if GetResourceState('p_vehiclekeys') == 'started' then
-        -- Key removal is handled authoritatively on server by lunar_garage (saveVehicle).
-        -- Also call official stock p_vehiclekeys client export if available for immediate UI responsiveness.
         pcall(function()
             if exports['p_vehiclekeys'] and exports['p_vehiclekeys'].removeKey then
                 exports['p_vehiclekeys']:removeKey(plate, nil, true)
+            else
+                TriggerServerEvent('p_vehiclekeys/removeKey', plate, true)
             end
         end)
     elseif Framework.name == 'es_extended' then
