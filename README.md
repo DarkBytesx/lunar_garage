@@ -1,9 +1,9 @@
-# Lunar Garage (Rework v1.0)
+# Lunar Garage (Rework v1.1)
 
 A high-performance, modern FiveM garage and impound management system for **ESX Legacy**, completely overhauled with a sleek dark dashboard UI, live vehicle telemetry, vehicle personalization, and seamless key management.
 
 [![GitHub Release](https://img.shields.io/github/v/release/DarkBytesx/lunar_garage?color=orange&label=Release)](https://github.com/DarkBytesx/lunar_garage/releases/latest)
-[![Download ZIP](https://img.shields.io/badge/Download-lunar__garage.zip-success)](https://github.com/DarkBytesx/lunar_garage/releases/download/v1.0/lunar_garage.zip)
+[![Download ZIP](https://img.shields.io/badge/Download-lunar__garage.zip-success)](https://github.com/DarkBytesx/lunar_garage/releases/download/v1.1/lunar_garage.zip)
 
 ---
 
@@ -59,7 +59,7 @@ A high-performance, modern FiveM garage and impound management system for **ESX 
 
 ---
 
-## 🛠️ Recent Fixes & Improvements (v1.0)
+## 🛠️ Recent Fixes & Improvements (v1.1)
 
 - **Impound State Synchronization**: Unified vehicle state resolution (`resolveVehicleState`) so newly booted servers or despawned vehicles (`stored == 0`) cleanly route to `in_impound` instead of being stuck.
 - **Dynamic Facility Filter Bar**: Impound Lot UI dynamically hides the `[In Garage]` filter button, showing only relevant tabs (`[All]`, `[Outside]`, `[Impounded]`, `[⭐ Favorites]`).
