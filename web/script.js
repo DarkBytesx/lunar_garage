@@ -373,7 +373,6 @@ function renderActionDock(vehicle) {
       const btnGps = document.createElement('button');
       btnGps.type = 'button';
       btnGps.className = 'btn-primary-action btn-gps';
-      btnGps.style.marginTop = '0.6vh';
       btnGps.innerHTML = `
         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>

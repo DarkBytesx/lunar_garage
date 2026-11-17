@@ -940,6 +940,7 @@ body {
 .details-action-dock {
   margin-top: auto;
   display: flex;
+  align-items: center;
   gap: 1vh;
   padding-top: 1vh;
 }
@@ -947,6 +948,8 @@ body {
 .btn-primary-action {
   flex: 1;
   height: 4.4vh;
+  margin: 0;
+  box-sizing: border-box;
   background: var(--primary-accent);
   color: #161616;
   border: none;
