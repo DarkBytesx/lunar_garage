@@ -53,8 +53,24 @@ local function transferToPlayer(source, plate, label)
                 end
                 exports.ox_inventory:AddItem(targetId, 'car_key', 1, { plate = trimmedPlate })
             else
-                pcall(function() exports['p_vehiclekeys']:removeKey(source, trimmedPlate, true) end)
-                pcall(function() exports['p_vehiclekeys']:createKey(targetId, trimmedPlate) end)
+                pcall(function()
+                    if exports['p_vehiclekeys'] and exports['p_vehiclekeys'].removeKey then
+                        exports['p_vehiclekeys']:removeKey(source, trimmedPlate, true)
+                    elseif exports['wasabi_carlock'] and exports['wasabi_carlock'].RemoveKey then
+                        exports['wasabi_carlock']:RemoveKey(source, trimmedPlate)
+                    elseif exports['Renewed-Vehiclekeys'] and exports['Renewed-Vehiclekeys'].removeKey then
+                        exports['Renewed-Vehiclekeys']:removeKey(source, trimmedPlate)
+                    end
+                end)
+                pcall(function()
+                    if exports['p_vehiclekeys'] and exports['p_vehiclekeys'].createKey then
+                        exports['p_vehiclekeys']:createKey(targetId, trimmedPlate)
+                    elseif exports['wasabi_carlock'] and exports['wasabi_carlock'].GiveKey then
+                        exports['wasabi_carlock']:GiveKey(targetId, trimmedPlate)
+                    elseif exports['Renewed-Vehiclekeys'] and exports['Renewed-Vehiclekeys'].addKey then
+                        exports['Renewed-Vehiclekeys']:addKey(targetId, trimmedPlate)
+                    end
+                end)
             end
         end)
     end

@@ -1,9 +1,9 @@
-# Lunar Garage (Rework v1.1)
+# Lunar Garage (Rework v1.2)
 
 A high-performance, modern FiveM garage and impound management system for **ESX Legacy**, completely overhauled with a sleek dark dashboard UI, live vehicle telemetry, vehicle personalization, and seamless key management.
 
 [![GitHub Release](https://img.shields.io/github/v/release/DarkBytesx/lunar_garage?color=orange&label=Release)](https://github.com/DarkBytesx/lunar_garage/releases/latest)
-[![Download ZIP](https://img.shields.io/badge/Download-lunar__garage.zip-success)](https://github.com/DarkBytesx/lunar_garage/releases/download/v1.1/lunar_garage.zip)
+[![Download ZIP](https://img.shields.io/badge/Download-lunar__garage.zip-success)](https://github.com/DarkBytesx/lunar_garage/releases/download/v1.2/lunar_garage.zip)
 
 ---
 
@@ -59,8 +59,17 @@ A high-performance, modern FiveM garage and impound management system for **ESX 
 
 ---
 
-## 🛠️ Recent Fixes & Improvements (v1.1)
+## 🛠️ Recent Fixes & Improvements
 
+### Version 1.2
+- **Zero-Touch Stock `p_vehiclekeys` Support**: Full native compatibility with official, unmodified [PiotreeQ/p_vehiclekeys](https://github.com/PiotreeQ/p_vehiclekeys). Zero modifications or file edits are needed on `p_vehiclekeys`.
+- **Universal Multi-Layer Key Pipeline**:
+  - Leverages built-in `wasabi_carlock`, `Renewed-Vehiclekeys`, and `qb-vehiclekeys` compatibility shims dynamically provided by `p_vehiclekeys`.
+  - Direct integration with `ox_inventory` for `car_key` item metadata checking and cleanup upon vehicle parking.
+  - Client-side immediate responsiveness via `exports['p_vehiclekeys']:removeKey`.
+- **Contract Key Transfer Optimization**: Vehicle contracts automatically remove old keys and grant the buyer keys through the universal pipeline.
+
+### Version 1.1
 - **Impound State Synchronization**: Unified vehicle state resolution (`resolveVehicleState`) so newly booted servers or despawned vehicles (`stored == 0`) cleanly route to `in_impound` instead of being stuck.
 - **Dynamic Facility Filter Bar**: Impound Lot UI dynamically hides the `[In Garage]` filter button, showing only relevant tabs (`[All]`, `[Outside]`, `[Impounded]`, `[⭐ Favorites]`).
 - **Dual Outside Actions at Impound**: Active vehicles outside in the city now offer both **Recover Vehicle ($1000)** and **Mark on GPS Waypoint** simultaneously when viewed at the impound facility.
@@ -73,8 +82,8 @@ A high-performance, modern FiveM garage and impound management system for **ESX 
 ## ⚠️ Need to Know
 
 > [!IMPORTANT]
-> - **Key Management Authority**:
->   Key creation is handled server-side upon successful vehicle spawn and retrieval to prevent duplicate key bugs. If you use a different key system than `p_vehiclekeys`, configure your exports in [config/cl_edit.lua](config/cl_edit.lua) and [server/main.lua](server/main.lua).
+> - **Key Management Authority & Compatibility**:
+>   Compatible out-of-the-box with **unmodified stock [p_vehiclekeys](https://github.com/PiotreeQ/p_vehiclekeys)**, `wasabi_carlock`, `Renewed-Vehiclekeys`, and `ox_inventory`. No edits to your keys script are required. Key creation and removal are handled authoritatively to eliminate duplicate keys.
 > - **Impound Fee Collection**:
 >   Impound fees are deducted upon vehicle retrieval at the impound facility. Ensure the player has adequate cash/bank funds.
 > - **UI Asset Streaming**:

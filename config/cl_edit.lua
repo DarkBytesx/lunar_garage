@@ -82,7 +82,13 @@ function RemoveVehicleKey(plate)
     if plate == '' then return end
 
     if GetResourceState('p_vehiclekeys') == 'started' then
-        -- Key removal is handled authoritatively on server by lunar_garage (saveVehicle)
+        -- Key removal is handled authoritatively on server by lunar_garage (saveVehicle).
+        -- Also call official stock p_vehiclekeys client export if available for immediate UI responsiveness.
+        pcall(function()
+            if exports['p_vehiclekeys'] and exports['p_vehiclekeys'].removeKey then
+                exports['p_vehiclekeys']:removeKey(plate, nil, true)
+            end
+        end)
     elseif Framework.name == 'es_extended' then
         if GetResourceState('wasabi_carlock') == 'started' then
             pcall(function()
