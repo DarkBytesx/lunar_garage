@@ -1,9 +1,9 @@
-# Lunar Garage (Rework v1.3)
+# Lunar Garage (Rework v1.4)
 
 A high-performance, modern FiveM garage and impound management system for **ESX Legacy**, completely overhauled with a sleek dark dashboard UI, live vehicle telemetry, vehicle personalization, and seamless key management.
 
 [![GitHub Release](https://img.shields.io/github/v/release/DarkBytesx/lunar_garage?color=orange&label=Release)](https://github.com/DarkBytesx/lunar_garage/releases/latest)
-[![Download ZIP](https://img.shields.io/badge/Download-lunar__garage.zip-success)](https://github.com/DarkBytesx/lunar_garage/releases/download/v1.3/lunar_garage.zip)
+[![Download ZIP](https://img.shields.io/badge/Download-lunar__garage.zip-success)](https://github.com/DarkBytesx/lunar_garage/releases/download/v1.4/lunar_garage.zip)
 
 ---
 
@@ -61,9 +61,12 @@ A high-performance, modern FiveM garage and impound management system for **ESX 
 
 ## 🛠️ Recent Fixes & Improvements
 
+### Version 1.4
+- **Official Client Key API Implementation**: Replaced invalid export checks with direct invocation of the official `exports['p_vehiclekeys']:createKey(plate, vehicle)` client export from the pScripts documentation.
+- **Safe `ox_inventory` Key Verification**: Verified existing keys directly through `ox_inventory:Search` to guarantee players receive exactly **1 key** without runtime export errors.
+
 ### Version 1.3
-- **Single-Authority Key Issuance Fix**: Fixed double-key issuance on vehicle take-out by delegating key granting entirely to the official client export `exports['p_vehiclekeys']:createKey(plate, vehicle)` as per official documentation.
-- **Client-Side Duplicate Guard**: Added `exports['p_vehiclekeys']:hasKey(plate)` check prior to key generation to guarantee players always receive exactly **1 key**.
+- **Single-Authority Key Issuance**: Delegated key issuance strictly to client-side API to eliminate double-key creation.
 
 ### Version 1.2
 - **Zero-Touch Stock `p_vehiclekeys` Support**: Full native compatibility with official, unmodified [PiotreeQ/p_vehiclekeys](https://github.com/PiotreeQ/p_vehiclekeys). Zero modifications or file edits are needed on `p_vehiclekeys`.

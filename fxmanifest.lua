@@ -5,7 +5,7 @@ lua54 'yes'
 
 author 'Lunar Scripts'
 description 'Garage system'
-version '1.3.0'
+version '1.4.0'
 
 ui_page 'web/index.html'
 

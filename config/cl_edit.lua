@@ -66,15 +66,19 @@ function SetVehicleOwner(plate, vehicle)
     if GetResourceState('p_vehiclekeys') == 'started' then
         pcall(function()
             local alreadyHasKey = false
-            if exports['p_vehiclekeys'] and exports['p_vehiclekeys'].hasKey then
-                alreadyHasKey = exports['p_vehiclekeys']:hasKey(plate)
+            if GetResourceState('ox_inventory') == 'started' then
+                local count = exports.ox_inventory:Search('count', 'car_key', { plate = plate }) or 0
+                if count and count > 0 then alreadyHasKey = true end
             end
+
             if not alreadyHasKey then
                 if exports['p_vehiclekeys'] and exports['p_vehiclekeys'].createKey then
                     exports['p_vehiclekeys']:createKey(plate, vehicle)
                 else
                     local netId = (vehicle and vehicle ~= 0 and NetworkGetEntityIsNetworked(vehicle)) and NetworkGetNetworkIdFromEntity(vehicle) or nil
-                    TriggerServerEvent('p_vehiclekeys/createKey', plate, netId)
+                    if netId then
+                        TriggerServerEvent('p_vehiclekeys/createKey', plate, netId)
+                    end
                 end
             end
         end)
